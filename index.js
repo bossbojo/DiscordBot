@@ -50,6 +50,15 @@ client.on('message', function (message) {
             guilds[message.guild.id].isPlaying = true;
             getID(args, function (id) {
                 if (guilds[message.guild.id].queue.length == 0) {
+                    if(guilds[message.guild.id].isPlaying){
+                        guilds[message.guild.id].queue.push(id);
+                        playMusic(id, message);
+                        fetchVideoInfo(id, function (err, videoInfo) {
+                            if (err) throw new Error(err);
+                            message.reply("กำลังเล่นเพลงนี้ **" + videoInfo.title + "**");
+                        });
+                        return;
+                    }
                     guilds[message.guild.id].queue.push('-39vr7SKaRk');
                     playMusic('-39vr7SKaRk', message);
                     setTimeout(() => {
@@ -78,7 +87,7 @@ client.on('message', function (message) {
                 skip_song(message);
                 message.reply("skip เพลงเรียบร้อยเเล้ว!");
             } else {
-                message.reply("การ skip ต้องการ votes อีก**" + Math.ceil((guilds[message.guild.id].voiceChannel.members.size - 1) / 2) - guilds[message.guild.id].skipRep + "** !");
+                message.reply("การ skip ต้องการ votes อีก**" + Math.ceil((guilds[message.guild.id].voiceChannel.members.size - 1) / 2) - guilds[message.guild.id].skipRep ) = "** !";
             }
         } else {
             message.reply("คุณ votes ซ้ำ");
@@ -99,7 +108,7 @@ client.on('message', function (message) {
             message2 += "```";
             message.channel.send(message2);
         }else{
-            message.channel.send("``` ไม่มีเพลงสักเพลง เจ้าโง่ ```");
+            message.channel.send("``` **ไม่มีเพลงสักเพลง เจ้าโง่** ```");
         }
     } else if (mess.startsWith(prefix + 'stop')) { //-------------------------------- queue
         leaveChannel(message);
@@ -120,6 +129,9 @@ function skip_song(message) {
 }
 function leaveChannel(message){
     guilds[message.guild.id].voiceChannel = message.member.voiceChannel;
+    guilds[message.guild.id].queue = [];
+    guilds[message.guild.id].queueName = [];
+    guilds[message.guild.id].isPlaying = false;
     guilds[message.guild.id].voiceChannel.leave();
 }
 function playMusic(id, message) {
@@ -177,8 +189,7 @@ function isYoutube(str) {
 }
 
 function search_video(query, callback) {
-    console.log(encodeURIComponent(query));
-
+    //console.log(encodeURIComponent(query));
     request("https://www.googleapis.com/youtube/v3/search?part=id&type=video&q=" + encodeURIComponent(query) + "&key=" + yt_api_key, function (error, response, body) {
         let json = JSON.parse(body);
         if (!json.items[0]) callback("3_-a9nVZYjk");
