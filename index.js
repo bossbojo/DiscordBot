@@ -73,6 +73,7 @@ client.on('message', function (message) {
             });
         }
     } else if (mess.startsWith(prefix + 'skip')) { //-------------------------------- skip
+        message.delete(1000);
         if (guilds[message.guild.id].skippers.indexOf(message.author.id) === -1) {
             guilds[message.guild.id].skippers.push(message.author.id);
             guilds[message.guild.id].skipRep++;
@@ -86,6 +87,7 @@ client.on('message', function (message) {
             message.reply("คุณ votes ซ้ำ");
         }
     } else if (mess.startsWith(prefix + 'queue') || mess.startsWith(prefix + 'q')) { //-------------------------------- queue
+        message.delete(1000);
         if (guilds[message.guild.id].queueName.length > 0) {
             var message2 = "```";
             for (let i = 0; i < guilds[message.guild.id].queueName.length; i++) {
@@ -104,8 +106,10 @@ client.on('message', function (message) {
             message.channel.send("``` **ไม่มีเพลงสักเพลง เจ้าโง่ เพิ่มเพลงอีกสิ** ```");
         }
     } else if (mess.startsWith(prefix + 'stop')) { //-------------------------------- stop
+        message.delete(1000);
         leaveChannel(message);
-    } else if (mess.startsWith(prefix + 'help') || mess.startsWith(prefix + 'h')) { //-------------------------------- stop
+    } else if (mess.startsWith(prefix + 'help') || mess.startsWith(prefix + 'h')) { //-------------------------------- help
+        message.delete(1000);
         let messagehelp = "```";
         messagehelp += "-play หรือ -p (ชื่อเพลง หรือ Link)  : เพิ่มเพลงโดยใช้คำสั่งนี้ \n";
         messagehelp += "-skip  : คำสั่งที่ใช้ข้ามเพลง (ต้องมีคน vote มากกว่าครึ่ง) \n";
@@ -115,7 +119,7 @@ client.on('message', function (message) {
         messagehelp += "** Create by [B]BJ**\n";
         messagehelp += "```";
         message.channel.send(messagehelp);
-    }
+    } 
 });
 
 
