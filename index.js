@@ -1,3 +1,4 @@
+//if have Error: OPUS_ENGINE_MISSING => npm install opusscript
 const Discord = require("discord.js");
 const client = new Discord.Client();
 const ytdl = require('ytdl-core');
@@ -32,8 +33,9 @@ client.on('message', function (message) {
         }
     }
 
-    if (mess.startsWith(prefix + 'play')) { //---------------- play
-        if(!message.member.voiceChannel){
+    if (mess.startsWith(prefix + 'play') || mess.startsWith(prefix + 'p')) { //---------------- play
+        message.delete(1000);
+        if (!message.member.voiceChannel) {
             message.reply("กรุณาเลือกเข้าสัก ** Channel ** เเล้วพิมคำสั่งเพิ่่มเพลงใหม่");
             return;
         }
@@ -51,7 +53,7 @@ client.on('message', function (message) {
             getID(args, function (id) {
                 if (guilds[message.guild.id].queue.length == 0) {
                     guilds[message.guild.id].queue.push('-39vr7SKaRk');
-                    playMusic('-39vr7SKaRk', message);
+                    playMusic('-39vr7SKaRk', message)
                     setTimeout(() => {
                         guilds[message.guild.id].queue.push(id);
                         playMusic(id, message);
@@ -59,7 +61,7 @@ client.on('message', function (message) {
                             if (err) throw new Error(err);
                             message.reply("กำลังเล่นเพลงนี้ **" + videoInfo.title + "**");
                         });
-                    }, 19000);
+                    }, 18000);
                 } else {
                     guilds[message.guild.id].queue.push(id);
                     playMusic(id, message);
@@ -78,13 +80,13 @@ client.on('message', function (message) {
                 skip_song(message);
                 message.reply("skip เพลงเรียบร้อยเเล้ว!");
             } else {
-                message.reply("การ skip ต้องการ votes อีก**" + Math.ceil((guilds[message.guild.id].voiceChannel.members.size - 1) / 2) - guilds[message.guild.id].skipRep + "** !");
+                message.reply("การ skip ต้องการ votes อีก**" + Math.ceil((guilds[message.guild.id].voiceChannel.members.size - 1) / 2) - guilds[message.guild.id].skipRep) = "** !";
             }
         } else {
             message.reply("คุณ votes ซ้ำ");
         }
-    } else if (mess.startsWith(prefix + 'queue')) { //-------------------------------- queue
-        if(guilds[message.guild.id].queueName.length > 0){
+    } else if (mess.startsWith(prefix + 'queue') || mess.startsWith(prefix + 'q')) { //-------------------------------- queue
+        if (guilds[message.guild.id].queueName.length > 0) {
             var message2 = "```";
             for (let i = 0; i < guilds[message.guild.id].queueName.length; i++) {
                 var temp = (i + 1) + " : " + guilds[message.guild.id].queueName[i] + (i === 0 ? " **เพลงต่อไป** " : "") + "\n";
@@ -98,13 +100,25 @@ client.on('message', function (message) {
             }
             message2 += "```";
             message.channel.send(message2);
-        }else{
-            message.channel.send("``` ไม่มีเพลงสักเพลง เจ้าโง่ ```");
+        } else {
+            message.channel.send("``` **ไม่มีเพลงสักเพลง เจ้าโง่ เพิ่มเพลงอีกสิ** ```");
         }
-    } else if (mess.startsWith(prefix + 'stop')) { //-------------------------------- queue
+    } else if (mess.startsWith(prefix + 'stop')) { //-------------------------------- stop
         leaveChannel(message);
+    } else if (mess.startsWith(prefix + 'help') || mess.startsWith(prefix + 'h')) { //-------------------------------- stop
+        let messagehelp = "```";
+        messagehelp += "-play หรือ -p (ชื่อเพลง หรือ Link)  : เพิ่มเพลงโดยใช้คำสั่งนี้ \n";
+        messagehelp += "-skip  : คำสั่งที่ใช้ข้ามเพลง (ต้องมีคน vote มากกว่าครึ่ง) \n";
+        messagehelp += "-stop  : หยุดการทำงานของ Deedoo bot \n";
+        messagehelp += "-queue หรือ -q : ดู queue เพลงตอนนี้ \n";
+        messagehelp += "-help หรือ -h  : ดูคำสั่งต่างๆ \n";
+        messagehelp += "** Create by [B]BJ**\n";
+        messagehelp += "```";
+        message.channel.send(messagehelp);
     }
 });
+
+
 client.on('ready', function () {
     console.log('Runing....');
 });
@@ -118,10 +132,15 @@ function skip_song(message) {
         skippers = [];
     }
 }
-function leaveChannel(message){
+
+function leaveChannel(message) {
     guilds[message.guild.id].voiceChannel = message.member.voiceChannel;
+    guilds[message.guild.id].queue = [];
+    guilds[message.guild.id].queueName = [];
+    guilds[message.guild.id].isPlaying = false;
     guilds[message.guild.id].voiceChannel.leave();
 }
+
 function playMusic(id, message) {
     guilds[message.guild.id].voiceChannel = message.member.voiceChannel;
     guilds[message.guild.id].voiceChannel.join()
@@ -177,8 +196,7 @@ function isYoutube(str) {
 }
 
 function search_video(query, callback) {
-    console.log(encodeURIComponent(query));
-
+    //console.log(encodeURIComponent(query));
     request("https://www.googleapis.com/youtube/v3/search?part=id&type=video&q=" + encodeURIComponent(query) + "&key=" + yt_api_key, function (error, response, body) {
         let json = JSON.parse(body);
         if (!json.items[0]) callback("3_-a9nVZYjk");
